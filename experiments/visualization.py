@@ -73,6 +73,16 @@ def plot_improvement_heatmap(df: pd.DataFrame, save=True):
     freq_models = [m for m in df["model"].unique() if "FreqMiniRocket" in m]
     datasets    = df["dataset"].unique()
 
+    # Guard: Nếu không có FreqMiniRocket nào chạy thành công → bỏ qua
+    if len(freq_models) == 0:
+        print("  ⚠️  plot_improvement_heatmap: Không có dữ liệu FreqMiniRocket để vẽ heatmap.")
+        return
+
+    # Guard: Nếu MiniRocket baseline cũng không có → không thể tính delta
+    if "MiniRocket" not in df["model"].values:
+        print("  ⚠️  plot_improvement_heatmap: Không có baseline MiniRocket để so sánh.")
+        return
+
     delta_data = {}
     for model in freq_models:
         deltas = []
@@ -87,10 +97,16 @@ def plot_improvement_heatmap(df: pd.DataFrame, save=True):
 
     delta_df = pd.DataFrame(delta_data, index=datasets)
 
+    # Guard: Nếu toàn bộ delta là NaN → không vẽ được heatmap
+    if delta_df.isnull().all().all():
+        print("  ⚠️  plot_improvement_heatmap: Tất cả giá trị delta đều là NaN, bỏ qua.")
+        return
+
     fig, ax = plt.subplots(figsize=(max(8, len(freq_models) * 2.5), max(5, len(datasets) * 0.8)))
     sns.heatmap(
         delta_df, annot=True, fmt=".3f", center=0,
         cmap="RdYlGn", linewidths=0.5, ax=ax,
+        vmin=delta_df.min().min(), vmax=delta_df.max().max(),  # tránh all-NaN crash
         cbar_kws={"label": "Δ Accuracy (vs MiniRocket)"}
     )
     ax.set_title("Cải thiện Tương đối của Freq-MiniRocket so với MiniRocket Gốc",

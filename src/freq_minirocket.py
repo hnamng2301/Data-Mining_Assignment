@@ -33,8 +33,8 @@
 import numpy as np
 from sklearn.linear_model import RidgeClassifierCV
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from aeon.transformations.collection.convolution_based import MiniRocket
+
+from .compat import make_minirocket
 
 from .freq_transform import FrequencyTransformer
 
@@ -112,7 +112,7 @@ class FreqMiniRocket:
 
         # ── Nhánh 1: Time-domain ──────────────────────────────────────
         print("  [1/4] MiniRocket time-domain...")
-        self._rocket_time = MiniRocket(
+        self._rocket_time = make_minirocket(
             num_kernels=self.num_kernels,
             random_state=self.random_state,
         )
@@ -124,7 +124,7 @@ class FreqMiniRocket:
         X_freq = self._freq_transformer.transform(X_train)  # (n, C', T')
 
         print("  [3/4] MiniRocket freq-domain...")
-        self._rocket_freq = MiniRocket(
+        self._rocket_freq = make_minirocket(
             num_kernels=self.num_kernels,
             random_state=self.random_state,
         )

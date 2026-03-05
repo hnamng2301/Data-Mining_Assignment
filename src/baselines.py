@@ -6,7 +6,7 @@
 import numpy as np
 from sklearn.linear_model import RidgeClassifierCV
 from sklearn.preprocessing import StandardScaler
-from aeon.transformations.collection.convolution_based import MiniRocket
+from .compat import make_minirocket
 from aeon.transformations.collection.feature_based import Catch22
 
 
@@ -15,7 +15,7 @@ class MiniRocketBaseline:
 
     def __init__(self, num_kernels=10_000, random_state=42, ridge_alphas=None):
         self.ridge_alphas = ridge_alphas or [1e-3, 1e-1, 1.0, 10.0, 100.0]
-        self._rocket   = MiniRocket(num_kernels=num_kernels, random_state=random_state)
+        self._rocket   = make_minirocket(num_kernels=num_kernels, random_state=random_state)
         self._scaler   = StandardScaler()
         self._clf      = RidgeClassifierCV(
             alphas=self.ridge_alphas, class_weight="balanced"
@@ -68,7 +68,7 @@ class FreqOnlyBaseline:
         from .freq_transform import FrequencyTransformer
         self.ridge_alphas = ridge_alphas or [1e-3, 1e-1, 1.0, 10.0, 100.0]
         self._freq_tf  = FrequencyTransformer(method=freq_method, normalize=True)
-        self._rocket   = MiniRocket(num_kernels=num_kernels, random_state=random_state)
+        self._rocket   = make_minirocket(num_kernels=num_kernels, random_state=random_state)
         self._scaler   = StandardScaler()
         self._clf      = RidgeClassifierCV(
             alphas=self.ridge_alphas, class_weight="balanced"
